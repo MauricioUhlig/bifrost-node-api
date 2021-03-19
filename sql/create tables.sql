@@ -46,3 +46,19 @@ create table connections_log (
 
 insert into status(status_id, status_description)
 values (1,'stopped'),(2,'running');
+
+create table users (
+    user_id integer not null primary key AUTOINCREMENT, 
+    login text not null, 
+    password text not NULL
+);
+
+create table session (
+    session_id integer not null primary key AUTOINCREMENT, 
+    user_id integer not null, 
+    login_date timestamp default CURRENT_TIMESTAMP,
+    token text not null, 
+    logout integer not null default 0
+);
+
+insert into users (login, password) values ('mauricio','9753186420');

@@ -12,6 +12,30 @@ class DB {
     });
   } 
   
+  getLogin(login, password, callback){
+    let sql = "select * from users where login = ? and password = ?"
+    this.db.get(sql,[login, password], (err,row) => callback(row) ); 
+  }
+
+  createSession(user_id, token, callback){
+    let sql = "insert into session (user_id, token) values (?, ?)"
+    this.db.run(sql,[user_id, token],(err) => {
+      if (err) {
+        throw err;
+      }
+      callback(err,user_id,token)
+    });
+  }
+  getSession(token, callback){
+    let sql = "select * from session where token = ? order by login_date desc limit 1"
+    this.db.get(sql,[token],(err,row) => {
+      if (err) {
+        throw err;
+      }
+      callback(err,row)
+    });
+  }
+
   insertConnection( address, port,is_tor, type, description, destination, callback){
     let sql = "insert into connections (address, port,is_tor, type, description, destination) values (?, ?, ?, ?, ?, ?)"
     this.db.run(sql,[address, port, is_tor, type, description, destination],(err) => {

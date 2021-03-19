@@ -1,5 +1,6 @@
 const Processes = require("../infra/process"); 
 const DB = require('../repository/database');
+const utils = require('../utils/utils')
 
 
 class Middleware {
@@ -7,7 +8,40 @@ class Middleware {
         this.processes = new Processes()
         this.database = new DB()
     }
+
+    login(params, callback){
+        let {login, password} = params
+        if (!login || !password){
+            callback('Invalid parameters',null)
+            return
+        }
+        this.database.getLogin(login,password,row => {
+            if(!row){
+                callback('User or Password wrong',null)
+                return
+            }
+            let token = utils.randKey(20)
+            this.database.createSession(row.user_id, token, callback)
+
+        })
+    }
     
+    validateSession(token, callback){
+        if(!token){
+            callback('Invalid token',null)
+            return
+        }
+        this.database.getSession(token, (err,row) => {
+            if(!row){
+                callback('Invalid token',null)
+                return
+            }
+            let dt = Date.parse(row.login_date)
+            var hours = Math.abs(Date.now() - dt) / 36e5;
+            callback(null,hours < 5  && row.logout == 0 ? true : false)
+        })
+    }
+
     newProcess(params,callback){
 
         let {address, port, description, is_tor, type, destination } = params

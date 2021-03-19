@@ -14,9 +14,49 @@ app.use((req, res, next) => {
 	//Quais são os métodos que a conexão pode realizar na API
     res.header("Access-Control-Allow-Methods", 'GET,PUT,POST,DELETE');
     app.use(cors());
-    next();
+
+    let token = req.headers.token;
+
+    if(req.url != '/login'){
+        mw.validateSession(token, (err,succsess) => {
+            if(err){
+                res.status(500).json({error: err})
+                return
+            }
+            if(succsess){
+                res.setHeader('toke',token)
+                next();
+            }
+            else 
+                res.status(500).json({error: 'Please Login'})
+            
+        })
+    }
+    else 
+        next();
 });
 
+app.post("/login", (req, res) => {
+    let params = {
+        login: req.body.login, 
+        password: req.body.password
+    }
+    if( !params.login || !params.password){
+        res.status(400).json({error: "Username or password null"})
+        return
+    }
+    mw.login(params,(err,user_id, token) => {
+        if(err){
+            res.status(400).json({error: err})
+        }
+        else if(token){
+            res.setHeader('token',token)
+            res.status(200).json({user_id,token}) 
+        }
+        else res.status(500).json({error:"Error"})
+    })
+    
+});
 
 app.post("/connection/new", (req, res) => {
     let params = {
