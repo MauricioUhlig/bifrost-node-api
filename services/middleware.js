@@ -15,8 +15,12 @@ class Middleware {
             callback('invalid parameters',null)
             return
         }
-        this.database.insertConnection(address, port, is_tor, type, description, destination, connection_id => callback(null, connection_id))
-
+        this.database.isConnectionPortFree(destination, res => {
+            if(res)
+                this.database.insertConnection(address, port, is_tor, type, description, destination, connection_id => callback(null, connection_id))
+            else 
+                callback('Port aready in use by other connection',null)
+        })
     };
     
     startProcess(params, callback){

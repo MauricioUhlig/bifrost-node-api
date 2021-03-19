@@ -22,6 +22,16 @@ class DB {
     }); 
   }
 
+  isConnectionPortFree(port, callback){
+    let sql = "select * from connections where port = ?"
+    this.db.all(sql, port, (err, rows) => {
+      if(err){
+        throw err;
+      }
+      callback(rows.length == 0)
+    } );
+  }
+
   getConnection(connection_id, callback){
     let sql = "select * from connections where connection_id = ?"
     this.db.get(sql,[connection_id], callback); 
