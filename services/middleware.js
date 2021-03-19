@@ -36,6 +36,15 @@ class Middleware {
                 callback('Port aready in use by other connection',null)
         })
     }
+    deleteConnection(params, callback){
+        let {connection_id } = params
+        if(!connection_id){
+            callback('invalid parameters',null)
+            return
+        }
+        this.database.deleteConnection(connection_id, resp => callback(null, resp))
+        
+    }
 
     startProcess(params, callback){
         

@@ -32,6 +32,16 @@ class DB {
     }); 
 
   }
+  deleteConnection( connection_id, callback){
+    let sql = "delete from connections where connection_id = ?"
+    this.db.all(sql,[connection_id],(err) => {
+      if (err) {
+        throw err;
+      }
+      callback(true)
+    }); 
+
+  }
 
   isConnectionPortFree(port, callback){
     let sql = "select * from connections where destination = ?"

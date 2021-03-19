@@ -59,6 +59,22 @@ app.put("/connection/:id", (req, res) => {
     }) 
 });
 
+app.delete("/connection/:id", (req, res) => {
+    let params = {
+        connection_id: req.params.id
+    }
+    mw.deleteConnection(params, (err, proc) => {
+        
+        if(err){
+            res.status(400).json({ error: err})
+        }
+        else if(proc){
+            res.status(200).json({ process: proc}) 
+        }
+        else res.status(500).json({ error: "Error"})
+    }) 
+});
+
 app.get("/connection/:connection_id/start", (req, res) => {
     let params = {
         connection_id: req.params.connection_id,
