@@ -21,9 +21,20 @@ class DB {
       callback(true)
     }); 
   }
+  
+  updateConnection( connection_id, address, port,is_tor, type, description, destination, callback){
+    let sql = "update connections set address = ?, port = ?, is_tor = ?, type = ?, description = ?, destination = ? where connection_id = ?"
+    this.db.all(sql,[address, port, is_tor, type, description, destination, connection_id],(err) => {
+      if (err) {
+        throw err;
+      }
+      callback(true)
+    }); 
+
+  }
 
   isConnectionPortFree(port, callback){
-    let sql = "select * from connections where port = ?"
+    let sql = "select * from connections where destination = ?"
     this.db.all(sql, port, (err, rows) => {
       if(err){
         throw err;
@@ -93,48 +104,7 @@ class DB {
       callback(rows)
     }); 
   }
-  /*
-  db.serialize(function() {
-    db.run("CREATE TABLE lorem (info TEXT)");
-   
-    var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
-    for (var i = 0; i < 10; i++) {
-        stmt.run("Ipsum " + i);
-    }
-    stmt.finalize();
-   
-    db.each("SELECT rowid AS id, info FROM lorem", function(err, row) {
-        console.log(row.id + ": " + row.info);
-    });
-  });
-  
-  
-  // select example
-  db.serialize(() => {
-      db.each(`SELECT PlaylistId as id,
-                      Name as name
-               FROM playlists`, (err, row) => {
-        if (err) {
-          console.error(err.message);
-        }
-        console.log(row.id + "\t" + row.name);
-      });
-    });
-  
-  // other select example
-  
-  let sql = `SELECT DISTINCT Name name FROM playlists
-             ORDER BY name`;
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      throw err;
-    }
-    rows.forEach((row) => {
-      console.log(row.name);
-    });
-  });
-  */
-  // close the database connection
+
   close(callback){
     this.db.close((err) => {
       if (err) {

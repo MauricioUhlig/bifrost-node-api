@@ -37,6 +37,27 @@ app.post("/connection/new", (req, res) => {
         else res.status(500).json({ error: "Error"})
     }) 
 });
+app.put("/connection/:id", (req, res) => {
+    let params = {
+        address: req.body.address, 
+        port: req.body.port, 
+        is_tor: req.body.is_tor,
+        description: req.body.description,
+        type: req.body.type,
+        destination: req.body.destination,
+        connection_id: (req.params.id || req.body.connection_id)
+    }
+    mw.updateProcess(params, (err, proc) => {
+        
+        if(err){
+            res.status(400).json({ error: err})
+        }
+        else if(proc){
+            res.status(200).json({ process: proc}) 
+        }
+        else res.status(500).json({ error: "Error"})
+    }) 
+});
 
 app.get("/connection/:connection_id/start", (req, res) => {
     let params = {
