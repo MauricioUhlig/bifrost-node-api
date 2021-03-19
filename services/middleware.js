@@ -23,6 +23,20 @@ class Middleware {
         })
     };
     
+    updateProcess(params, callback){
+        let {address, port, description, is_tor, type, destination, connection_id } = params
+        if(!address || !port || !type || !(["TCP","UDP"].includes(type)) ||!connection_id){
+            callback('invalid parameters',null)
+            return
+        }
+        this.database.isConnectionPortFree(destination, res => {
+            if(res)
+                this.database.updateConnection(connection_id, address, port, is_tor, type, description, destination, connection => callback(null, connection))
+            else 
+                callback('Port aready in use by other connection',null)
+        })
+    }
+
     startProcess(params, callback){
         
         this.database.getConnection(params.connection_id, (err, row) => {
@@ -95,16 +109,3 @@ class Middleware {
 }
 
 module.exports = Middleware;
-/*
-this.database.listUsers((err,rows) => console.log(rows))
-
-this.database.close((err,success) => {
-    if(err){
-        throw err;
-    }
-    if(success){
-        console.log('Storagem desconctado com sucesso')
-    }
-})
-
-*/
