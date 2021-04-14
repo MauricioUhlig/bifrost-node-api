@@ -17,13 +17,13 @@ class DB {
     this.db.get(sql,[login, password], (err,row) => callback(row) ); 
   }
 
-  createSession(user_id, token, callback){
+  createSession(user_id, token, login, callback){
     let sql = "insert into session (user_id, token) values (?, ?)"
     this.db.run(sql,[user_id, token],(err) => {
       if (err) {
         throw err;
       }
-      callback(err,user_id,token)
+      callback(err,user_id,token,login)
     });
   }
   getSession(token, callback){
@@ -83,7 +83,21 @@ class DB {
   }
   
   getUserConnections(callback){
-    let sql = "select * from connections"
+    let sql = `select a.connection_id, 
+        a.address, 
+        a.port, 
+        a.is_tor, 
+        case when c.statusType is null then 'warning' else c.statusType end  statusType,
+        case when c.status_description is null then 'stopped' else c.status_description end as status,
+        a.type, 
+        a.description, 
+        a.destination
+    from connections a 
+        left join connections_log b on a.connection_id = b.connection_id
+        left join status c on b.status_id = c.status_id
+        left join (select connection_id, max(connections_log_id) connections_log_id 
+                from connections_log group by connection_id) d on a.connection_id = d.connection_id
+    where b.connections_log_id is null or b.connections_log_id = d.connections_log_id`
     this.db.all(sql,callback); 
   }
   

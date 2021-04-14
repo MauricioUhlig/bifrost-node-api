@@ -9,18 +9,18 @@ const { json, urlencoded } = require('body-parser');
 app.use(json()); // support json encoded bodies
 app.use(urlencoded({ extended: true })); // support encoded bodies
 app.use((req, res, next) => {
-	//Qual site tem permissão de realizar a conexão, no exemplo abaixo está o "*" indicando que qualquer site pode fazer a conexão
+    //Qual site tem permissão de realizar a conexão, no exemplo abaixo está o "*" indicando que qualquer site pode fazer a conexão
     res.header("Access-Control-Allow-Origin", "*");
 	//Quais são os métodos que a conexão pode realizar na API
     res.header("Access-Control-Allow-Methods", 'GET,PUT,POST,DELETE');
     app.use(cors());
-
+    
     let token = req.headers.token;
-
-    if(req.url != '/login'){
+    
+    if(req.url != '/login' && req.method != 'OPTIONS'){
         mw.validateSession(token, (err,succsess) => {
             if(err){
-                res.status(500).json({error: err})
+                res.status(401).json({error: err})
                 return
             }
             if(succsess){
@@ -45,13 +45,13 @@ app.post("/login", (req, res) => {
         res.status(400).json({error: "Username or password null"})
         return
     }
-    mw.login(params,(err,user_id, token) => {
+    mw.login(params,(err,user_id, token, login) => {
         if(err){
             res.status(400).json({error: err})
         }
         else if(token){
             res.setHeader('token',token)
-            res.status(200).json({user_id,token}) 
+            res.status(200).json({user_id,token, login}) 
         }
         else res.status(500).json({error:"Error"})
     })

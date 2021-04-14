@@ -21,7 +21,7 @@ class Middleware {
                 return
             }
             let token = utils.randKey(20)
-            this.database.createSession(row.user_id, token, callback)
+            this.database.createSession(row.user_id, token, login, callback)
 
         })
     }
@@ -87,26 +87,27 @@ class Middleware {
                 callback('Error at getConnetion! Connection not found',null)
                 return
             }
-            else if(row.user_id == params.user_id){
+            else {
                 let {address, port, type, destination, is_tor} = row
                 this.getPorts({port: destination, is_active: null,top: 1}, (rows) => {
-                    if(rows[0].is_active == '1'){
-                        callback(`The port ${destination} is aready in use`,false)
-                    }
-                    else{
-                        this.database.setPort(port, 1) // set port as active
-                        let p = this.processes.newProcess(params.connection_id, address,destination,port, type, is_tor);  
-                        this.database.insertConnectionLog(params.connection_id, port, p._pid, p._command, 2) // insert in connection_log table as running process
-                        let process_json = {
-                            process_id: p._id,
-                            status: p._status
+                    if(rows[0]){
+                        if(rows[0].is_active == '1'){
+                            callback(`The port ${destination} is aready in use`,false)
                         }
-                        callback(null,process_json)  
-                    } 
+                        else{
+                            this.database.setPort(port, 1) // set port as active
+                            let p = this.processes.newProcess(params.connection_id, address,destination,port, type, is_tor);  
+                            this.database.insertConnectionLog(params.connection_id, port, p._pid, p._command, 2) // insert in connection_log table as running process
+                            let process_json = {
+                                process_id: p._id,
+                                status: p._status
+                            }
+                            callback(null,process_json)  
+                        } 
+                    }
+                    else 
+                        callback(`The port ${destination} can't be used`,false)
                 })
-            }
-            else {
-                callback("The user doesn't own the connection", false)
             }
         })
             
@@ -122,13 +123,19 @@ class Middleware {
             else {
                 this.processes.stopID(params.connection_id);  
                 this.database.getConnectionLog(params.connection_id,1, (rows) => { // get last log inserted to the connection_id
-                    if(rows){
+                    if(rows[0]){
                         this.database.setPort(rows[0].port, 0) // set port as idle
-                        if(rows[0].status_id != 1)
-                        this.database.insertConnectionLog(params.connection_id, rows[0].port, null,null, 1) // insert in connection_log table as stopped
+                        if(rows[0].status_id != 1){
+                            this.database.insertConnectionLog(params.connection_id, rows[0].port, null,null, 1) // insert in connection_log table as stopped
+                            callback(null,'succsess')  
+                        }
+                        else 
+                            callback(`The connection ${params.connection_id} is not running!`,null) ;
                     }
+                    else {
+                        callback(`The connection ${params.connection_id} is not running!`,null) ;
+                    } 
                 }) 
-                callback(null,'succsess')  
             }
             
         })
