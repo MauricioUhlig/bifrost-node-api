@@ -64,7 +64,7 @@ class Middleware {
             return
         }
         this.database.isConnectionPortFree(destination, res => {
-            if(res)
+            if(res.length == 0 || res.find(row => row.connection_id == connection_id))
                 this.database.updateConnection(connection_id, address, port, is_tor, type, description, destination, connection => callback(null, connection))
             else 
                 callback('Port aready in use by other connection',null)

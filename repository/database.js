@@ -73,7 +73,7 @@ class DB {
       if(err){
         throw err;
       }
-      callback(rows.length == 0)
+      callback(rows)
     } );
   }
 
