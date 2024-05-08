@@ -9,3 +9,5 @@ The strategy used is to create a socket connection that generates a tunnel, simu
 - Tor
 - SQLite 3
 - Open HTTP ports
+
+> To login on the API use user: `user` password: `1234`. You can change this on table `users` in `data/storage.db` file using `sqlite3`
